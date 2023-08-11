@@ -5,10 +5,11 @@ import Skeleton from "./Skeleton";
 import useFetch from "../hooks/use-fetch";
 import { TagContext } from "../App";
 import { EditBody, Task } from "../types";
+import { BASE_URL } from "../const";
 
 function TodoList() {
 	const { tag, setTag } = React.useContext(TagContext);
-	const { data, loading, error } = useFetch<Task[]>("/api/task/get", tag);
+	const { data, loading, error } = useFetch<Task[]>("/task/get", tag, BASE_URL);
 	const [isLoading, setIsLoading] = React.useState(false);
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -19,9 +20,12 @@ function TodoList() {
 			const deleted = form.get(`delete-${task.id}`) === "on";
 			return { id: task.id, completed, deleted };
 		});
-		fetch("/api/task/edit", {
-			method: "POST",
+		fetch(`${BASE_URL}/task/edit`, {
+			method: "PUT",
 			body: JSON.stringify(states),
+			headers: {
+				"Content-Type": "application/json",
+			},
 		})
 			.then((res) => res.json())
 			.then((data) => {
@@ -34,11 +38,12 @@ function TodoList() {
 		setIsLoading(true);
 	};
 	const tasks = data || [];
+	const isError = error !== null;
 
 	return (
 		<form className="flex flex-col gap-2" onSubmit={handleSubmit}>
 			<ul className="flex flex-col gap-1">
-				{error! ? (
+				{isError ? (
 					<p className="text-red-500">Error</p>
 				) : loading ? (
 					<>

@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import Button from "./Atom/button";
 import { TagContext } from "../App";
+import { BASE_URL } from "../const";
 // import { Res } from "../pages/api/task/add";
 
 function Add() {
@@ -11,11 +12,14 @@ function Add() {
 		const task = form.get("add-task");
 		async function fetching() {
 			if (!task) return;
-			const response = await fetch("/api/task/add", {
+			const response = await fetch(`${BASE_URL}/task/add`, {
 				method: "POST",
-				body: task.toString(),
+				body: JSON.stringify({ task }),
+				headers: {
+					"Content-Type": "application/json",
+				},
 			});
-			const data = (await response.json());
+			const data = await response.json();
 			if (data.data) setTag(Math.random().toString());
 			else console.error(data.error);
 		}
