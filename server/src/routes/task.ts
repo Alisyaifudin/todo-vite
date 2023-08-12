@@ -1,8 +1,5 @@
 import express from "express";
 import { db } from "../db/";
-// import { Task, tasks } from "../db/schema";
-import { desc, eq } from "drizzle-orm";
-import { RowDataPacket } from "mysql2/promise";
 
 const taskRoute = express.Router();
 
@@ -27,11 +24,10 @@ taskRoute.post("/add", async (req, res) => {
 		const [ids, _0] = await connection.query<Id[]>(`SELECT id FROM tasks ORDER BY id DESC`);
 		if (ids.length > 15) throw Error("Task limit reached");
 		const id = ids.length > 0 ? ids[0].id + 1 : 0;
-		const [rows, _1] = await connection.execute(
-			"INSERT INTO `tasks` (`id`, `task`, `completed`) VALUES (?, ?, '0')",
-			[id, task]
-		);
-		console.log(rows)
+		await connection.execute("INSERT INTO `tasks` (`id`, `task`, `completed`) VALUES (?, ?, '0')", [
+			id,
+			task,
+		]);
 		return res.status(200).send({
 			data: true,
 			error: undefined,
@@ -83,10 +79,13 @@ taskRoute.put("/edit", async (req, res) => {
 		const connection = await db;
 		for (const task of body) {
 			if (task.deleted) {
-				const [rows, _] = await connection.execute("DELETE FROM `tasks` WHERE `id` = ?", [task.id]);
+				await connection.execute("DELETE FROM `tasks` WHERE `id` = ?", [task.id]);
 				continue;
 			}
-			const [rows, _] = await connection.execute("UPDATE `tasks` SET `completed` = ? WHERE `id` = ?", [task.completed, task.id]);
+			await connection.execute("UPDATE `tasks` SET `completed` = ? WHERE `id` = ?", [
+				task.completed,
+				task.id,
+			]);
 		}
 		return res.status(200).send({
 			data: true,
