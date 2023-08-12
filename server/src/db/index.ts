@@ -1,5 +1,4 @@
-import { drizzle } from "drizzle-orm/mysql2";
-import mysql from "mysql2";
+import mysql from "mysql2/promise";
 
 const HOST = process.env.DATABASE_HOST;
 const USER = process.env.DATABASE_USER;
@@ -22,12 +21,10 @@ if (Number.isNaN(Number(PORT))) {
 	throw new Error(`Invalid database port: ${PORT}`);
 }
 
-const connection = mysql.createConnection({
+export const db = mysql.createConnection({
 	host: HOST,
 	user: USER,
 	database: DATABASE,
 	password: PASSWORD,
 	port: Number(PORT),
 });
-
-export const db = drizzle(connection);
